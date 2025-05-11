@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Book Recommender</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    form {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    input, select, button {
+      padding: 8px;
+      margin: 5px;
+    }
+
+    .book-list {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .book {
+      display: flex;
+      align-items: center;
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      transition: transform 0.3s ease;
+    }
+
+    .book img {
+      height: 100px;
+      margin-right: 15px;
+      border-radius: 4px;
+    }
+
+    .book:hover {
+      transform: scale(1.01);
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      width: 90%;
+      height: 90%;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    }
+
+    .modal-left {
+      width: 50%;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .modal-right {
+      width: 50%;
+      padding: 30px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .modal-right h2 {
+      margin-top: 0;
+      font-size: 28px;
+    }
+
+    .modal-right p {
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      font-size: 40px;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📚 Smart Book Recommender</h1>
+
+  <form method="get">
+    <input type="text" name="q" placeholder="Search books..." value="{{ query }}" />
+    <select name="genre">
+      <option value="">All Genres</option>
+      {% for g in genres %}
+        <option value="{{ g }}" {% if g == selected_genre %}selected{% endif %}>{{ g }}</option>
+      {% endfor %}
+    </select>
+    <select name="emotion">
+      <option value="">Any Emotion</option>
+      {% for e in emotions %}
+        <option value="{{ e }}" {% if e == selected_emotion %}selected{% endif %}>{{ e|title }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">🔍 Search</button>
+  </form>
+
+  {% if books %}
+  <div class="book-list">
+    {% for book in books %}
+    <div class="book" onclick="openModal(`{{ book.thumbnail }}`, `{{ book.title }}`, `{{ book.authors }}`, `{{ book.average_rating }}`, `{{ book.description|escapejs }}`)">
+      <img src="{{ book.thumbnail }}" alt="Cover" />
+      <div>
+        <strong>{{ book.title }}</strong><br/>
+        <em>{{ book.authors }}</em><br/>
+        ⭐ {{ book.average_rating }}<br/>
+        <p>{{ book.short_description }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+    <p>No books found. Try a broader search or another filter.</p>
+  {% endif %}
+
+  <!-- Modal -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-left" id="modalThumbnail"></div>
+      <div class="modal-right">
+        <h2 id="modalTitle"></h2>
+        <p><em id="modalAuthor"></em></p>
+        <p>⭐ <span id="modalRating"></span></p>
+        <p id="modalDescription"></p>
+      </div>
+    </div>
+    <span class="close-btn" onclick="closeModal()">×</span>
+  </div>
+
+  <script>
+    function openModal(thumbnail, title, author, rating, description) {
+      document.getElementById("modal").style.display = "flex";
+      document.getElementById("modalThumbnail").style.backgroundImage = `url('${thumbnail}')`;
+      document.getElementById("modalTitle").textContent = title;
+      document.getElementById("modalAuthor").textContent = author;
+      document.getElementById("modalRating").textContent = rating;
+      document.getElementById("modalDescription").textContent = description;
+    }
+
+    function closeModal() {
+      document.getElementById("modal").style.display = "none";
+    }
+  </script>
+
+</body>
+</html>
